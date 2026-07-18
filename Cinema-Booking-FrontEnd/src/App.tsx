@@ -9,6 +9,7 @@ import ScrollToTop from "./components/ScrollToTop.tsx";
 import MovieDetails from "./components/movie-pages/MovieDetails.tsx";
 import SelectSeat from "./components/movie-pages/SelectSeat.tsx";
 import TheaterList from "./components/theater-pages/TheaterList.tsx";
+import MoviesByTheater from "./components/theater-pages/MoviesByTheater.tsx";
 import ReleasePage from "./components/release-page/ReleasePage.tsx";
 import Favourites from "./components/Favourites.tsx";
 import Profile from "./components/Profile.tsx";
@@ -102,6 +103,15 @@ function App() {
               <Header />
               <main className="grow">
                 <TheaterList />
+              </main>
+              <Footer />
+            </>
+          } />
+          <Route path="/theater/:theaterId/movies" element={
+            <>
+              <Header />
+              <main className="grow">
+                <MoviesByTheater />
               </main>
               <Footer />
             </>
