@@ -53,6 +53,14 @@ public class MovieService {
                 .collect(Collectors.toList());
     }
 
+    public List<MovieResponse> getMoviesByTheaterId(Long theaterId) {
+        return showTimeRepository.findByTheaterId(theaterId).stream()
+                .map(showTime -> showTime.getMovie())
+                .distinct()
+                .map(this::mapToMovieResponse)
+                .collect(Collectors.toList());
+    }
+
     public MovieResponse createMovie(CreateMovieRequest request) {
         Movie movie = new Movie();
         movie.setTitle(request.getTitle());

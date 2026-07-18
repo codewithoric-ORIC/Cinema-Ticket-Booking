@@ -212,6 +212,28 @@ export const fetchAllTrailers = async (): Promise<Trailer[]> => {
   }
 };
 
+export const fetchAllTheaters = async (): Promise<Theater[]> => {
+  try {
+    const response = await api.get("/theaters");
+    return response.data;
+  } catch (e) {
+    return [
+      { id: 1, name: "Grand Cinema", location: "Downtown", totalSeats: 100 },
+      { id: 2, name: "Cineplex", location: "Mall", totalSeats: 150 }
+    ];
+  }
+};
+
+export const fetchMoviesByTheaterId = async (theaterId: number): Promise<Movie[]> => {
+  try {
+    const response = await api.get(`/movies/theater/${theaterId}`);
+    return response.data;
+  } catch (e) {
+    const movies = getMockMovies();
+    return movies;
+  }
+};
+
 export const fetchTrailersByMovieId = async (movieId: number): Promise<Trailer[]> => {
   try {
     const response = await api.get(`/trailers/movie/${movieId}`);

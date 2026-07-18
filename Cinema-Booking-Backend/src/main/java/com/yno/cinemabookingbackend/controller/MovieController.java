@@ -36,6 +36,11 @@ public class MovieController {
         return ResponseEntity.ok(movieService.getUpcomingMovies());
     }
 
+    @GetMapping("/theater/{theaterId}")
+    public ResponseEntity<List<MovieResponse>> getMoviesByTheaterId(@PathVariable Long theaterId) {
+        return ResponseEntity.ok(movieService.getMoviesByTheaterId(theaterId));
+    }
+
     @PostMapping
     public ResponseEntity<MovieResponse> createMovie(@RequestBody CreateMovieRequest request) {
         return ResponseEntity.ok(movieService.createMovie(request));
