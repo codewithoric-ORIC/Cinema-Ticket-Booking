@@ -1,0 +1,10 @@
+@import "tailwindcss";
+@plugin "daisyui";
+
+    /* index.css */
+body {
+    margin: 0;
+    /* ဒါက အောက်ခံ Background ဖြစ်ပါတယ် */
+    background: #f1f5f9;
+    min-height: 100vh;
+}
