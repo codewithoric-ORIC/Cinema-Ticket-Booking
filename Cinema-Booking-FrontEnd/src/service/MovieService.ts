@@ -118,64 +118,62 @@ export const fetchShowtimesByMovieId = async (movieId: number): Promise<Showtime
       { id: 2, name: "Cineplex", location: "Mall", totalSeats: 150 }
     ];
 
-    const allShowtimes: Showtime[] = [
-      // Movie 1
+    // Get the requested movie, or create a dummy if not found
+    let requestedMovie = mockMovies.find(m => m.id === movieId);
+    if (!requestedMovie) {
+      requestedMovie = {
+        id: movieId,
+        title: "Movie",
+        description: "A great movie",
+        rating: 8.0,
+        imageUrl: "",
+        duration: 120,
+        genre: "Action",
+        year: 2024,
+        releaseDate: new Date().toISOString().split('T')[0],
+        isActive: true,
+        cast: [],
+        trailers: []
+      };
+    }
+
+    // Generate showtimes specifically for this movie
+    const showtimes: Showtime[] = [
       {
-        id: 1,
+        id: movieId * 10 + 1,
         theater: mockTheaters[0],
         showDate: DATES[0],
         showTime: "14:00",
         availableSeats: 50
       },
       {
-        id: 2,
+        id: movieId * 10 + 2,
         theater: mockTheaters[0],
         showDate: DATES[0],
         showTime: "18:00",
         availableSeats: 45
       },
       {
-        id: 3,
+        id: movieId * 10 + 3,
         theater: mockTheaters[1],
         showDate: DATES[1],
         showTime: "20:00",
         availableSeats: 30
       },
-      // Movie 2
       {
-        id: 4,
-        theater: mockTheaters[0],
-        showDate: DATES[0],
-        showTime: "19:00",
-        availableSeats: 75
-      },
-      {
-        id: 5,
+        id: movieId * 10 + 4,
         theater: mockTheaters[1],
-        showDate: DATES[1],
-        showTime: "15:00",
-        availableSeats: 80
-      },
-      // Movie 3
-      {
-        id: 6,
-        theater: mockTheaters[1],
-        showDate: DATES[1],
-        showTime: "17:00",
-        availableSeats: 40
+        showDate: DATES[2],
+        showTime: "16:00",
+        availableSeats: 60
       }
     ];
 
-    // Assign movies to showtimes
-    const showtimesWithMovies = allShowtimes.map((st, index) => {
-      const movieIndex = index < 3 ? 0 : index < 5 ? 1 : 2;
-      return {
-        ...st,
-        movie: mockMovies[movieIndex]
-      };
-    });
-
-    return showtimesWithMovies.filter(st => (st as any).movie?.id === movieId);
+    // Assign the requested movie to all showtimes
+    return showtimes.map(st => ({
+      ...st,
+      movie: requestedMovie
+    }));
   }
 };
 
