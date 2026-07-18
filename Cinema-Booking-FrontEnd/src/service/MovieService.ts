@@ -38,6 +38,7 @@ export interface Theater {
 export interface Showtime {
     id: number;
     theater: Theater;
+    movie?: Movie;
     showDate: string;
     showTime: string;
     availableSeats: number;
