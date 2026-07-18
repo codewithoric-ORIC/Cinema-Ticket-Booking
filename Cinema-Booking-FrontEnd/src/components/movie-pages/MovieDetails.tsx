@@ -71,7 +71,7 @@ function MovieDetails() {
         return Array.from(uniqueTheaters.values());
     };
 
-    // Get unique dates from showtimes for selected theater
+    // Get unique dates from showtimes (filtered by theater if selected)
     const availableDatesFromShowtimes = () => {
         const uniqueDates = new Set<string>();
         const filteredShowtimes = selectedTheater 
@@ -81,12 +81,16 @@ function MovieDetails() {
         return AVAILABLE_DATES.filter(d => uniqueDates.has(d.fullDate));
     };
 
-    // Get showtimes for selected theater and date
-    const getShowtimesForDate = (date: string) => {
-        const filteredShowtimes = selectedTheater 
-            ? showtimes.filter(st => st.theater.id === selectedTheater.id) 
-            : showtimes;
-        return filteredShowtimes.filter(st => st.showDate === date);
+    // Get showtimes (filtered by theater and date if selected)
+    const getShowtimes = () => {
+        let filteredShowtimes = showtimes;
+        if (selectedTheater) {
+            filteredShowtimes = filteredShowtimes.filter(st => st.theater.id === selectedTheater.id);
+        }
+        if (selectedDate) {
+            filteredShowtimes = filteredShowtimes.filter(st => st.showDate === selectedDate);
+        }
+        return filteredShowtimes;
     };
 
     useEffect(() => {
@@ -139,12 +143,14 @@ function MovieDetails() {
         return <div className="min-h-screen flex items-center justify-center text-slate-800 font-bold">Movie not found!</div>;
     }
 
+    // Check if all selections are made to enable booking
+    const isBookingEnabled = selectedTheater && selectedDate && selectedShowtime;
+
     // 💡 This is where we pass data to Select Seat
     const handleBooking = () => {
         if (selectedShowtime) {
             const bookedDate = AVAILABLE_DATES.find(d => d.fullDate === selectedShowtime.showDate);
             if (bookedDate) {
-                // Pass all necessary data
                 navigate(`/select-seat/${movie.id}`, { 
                     state: { 
                         date: bookedDate.date, 
@@ -229,10 +235,10 @@ function MovieDetails() {
                         <IoPlay className="w-3.5 h-3.5 text-purple-600" /> Watch Trailer
                     </button>
 
-                            {/* 💡 Buy Ticket Button added to Action Bar */}
+                            {/* 💡 Buy Ticket Button */}
                             <button
                                 onClick={handleBooking}
-                                disabled={!selectedShowtime}
+                                disabled={!isBookingEnabled}
                                 className="group relative h-10 px-6 rounded-xl text-[11px] font-bold text-white
                                            bg-gradient-to-r from-purple-600 to-indigo-600
                                            shadow-[0_4px_12px_rgba(124,58,237,0.15),inset_0_1px_1px_rgba(255,255,255,0.3)]
@@ -273,10 +279,10 @@ function MovieDetails() {
                     </div>
                 </div>
 
-                {/* 🎬 Choose Theater, Date & Book Now Section */}
-                <div className="mt-10 pt-8 border-t border-slate-200/40 flex flex-col gap-6">
+                {/* 🎬 Complete Booking Section (All Options Visible) */}
+                <div className="mt-10 pt-8 border-t border-slate-200/40 flex flex-col gap-8">
                     {/* Theater Selection */}
-                    <div className="space-y-4 flex-grow max-w-xl">
+                    <div className="space-y-4">
                         <div className="flex items-center gap-2">
                             <IoLocationOutline className="w-4 h-4 text-purple-600" />
                             <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400">Choose Theater</h3>
@@ -289,7 +295,6 @@ function MovieDetails() {
                                         key={theater.id}
                                         onClick={() => {
                                             setSelectedTheater(theater);
-                                            setSelectedDate("");
                                             setSelectedShowtime(null);
                                         }}
                                         className={`flex flex-col items-center justify-center p-2.5 min-w-[120px] h-[72px] rounded-2xl border transition-all duration-300 cursor-pointer text-center select-none
@@ -311,79 +316,75 @@ function MovieDetails() {
                     </div>
 
                     {/* Date Selection */}
-                    {selectedTheater && (
-                        <div className="space-y-4 flex-grow max-w-xl">
-                            <div className="flex items-center gap-2">
-                                <IoCalendarOutline className="w-4 h-4 text-purple-600" />
-                                <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400">Choose Date</h3>
-                            </div>
-                            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
-                                {availableDatesFromShowtimes().map((d) => {
-                                    const isSelected = selectedDate === d.fullDate;
-                                    return (
-                                        <button
-                                            key={d.id}
-                                            onClick={() => {
-                                                setSelectedDate(d.fullDate);
-                                                setSelectedShowtime(null);
-                                            }}
-                                            className={`flex flex-col items-center justify-center p-2.5 min-w-[64px] h-[72px] rounded-2xl border transition-all duration-300 cursor-pointer text-center select-none
-                                                ${isSelected
-                                                ? "bg-gradient-to-b from-purple-600 to-indigo-600 border-purple-600 text-white shadow-md shadow-purple-600/10 scale-102"
-                                                : "bg-white/80 border-slate-200/60 text-slate-700 hover:border-purple-300 hover:bg-white"
-                                            }`}
-                                        >
-                                            <span className={`text-[10px] font-bold tracking-wide uppercase ${isSelected ? "text-purple-200" : "text-slate-400"}`}>
-                                                {d.day}
-                                            </span>
-                                            <span className="text-xs font-extrabold tracking-tight mt-1">
-                                                {d.date}
-                                            </span>
-                                        </button>
-                                    );
-                                })}
-                            </div>
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-2">
+                            <IoCalendarOutline className="w-4 h-4 text-purple-600" />
+                            <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400">Choose Date</h3>
                         </div>
-                    )}
+                        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
+                            {availableDatesFromShowtimes().map((d) => {
+                                const isSelected = selectedDate === d.fullDate;
+                                return (
+                                    <button
+                                        key={d.id}
+                                        onClick={() => {
+                                            setSelectedDate(d.fullDate);
+                                            setSelectedShowtime(null);
+                                        }}
+                                        className={`flex flex-col items-center justify-center p-2.5 min-w-[64px] h-[72px] rounded-2xl border transition-all duration-300 cursor-pointer text-center select-none
+                                            ${isSelected
+                                            ? "bg-gradient-to-b from-purple-600 to-indigo-600 border-purple-600 text-white shadow-md shadow-purple-600/10 scale-102"
+                                            : "bg-white/80 border-slate-200/60 text-slate-700 hover:border-purple-300 hover:bg-white"
+                                        }`}
+                                    >
+                                        <span className={`text-[10px] font-bold tracking-wide uppercase ${isSelected ? "text-purple-200" : "text-slate-400"}`}>
+                                            {d.day}
+                                        </span>
+                                        <span className="text-xs font-extrabold tracking-tight mt-1">
+                                            {d.date}
+                                        </span>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
                     
                     {/* Showtimes Section */}
-                    {selectedTheater && selectedDate && (
-                        <div className="space-y-4 flex-grow max-w-xl">
-                            <div className="flex items-center gap-2">
-                                <IoTimeOutline className="w-4 h-4 text-purple-600" />
-                                <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400">Choose Showtime</h3>
-                            </div>
-                            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
-                                {getShowtimesForDate(selectedDate).map((st) => {
-                                    const isSelected = selectedShowtime?.id === st.id;
-                                    return (
-                                        <button
-                                            key={st.id}
-                                            onClick={() => setSelectedShowtime(st)}
-                                            className={`flex flex-col items-center justify-center px-5 py-3 rounded-2xl border transition-all duration-300 cursor-pointer text-center select-none min-w-[100px]
-                                                ${isSelected
-                                                ? "bg-gradient-to-b from-purple-600 to-indigo-600 border-purple-600 text-white shadow-md shadow-purple-600/10 scale-102"
-                                                : "bg-white/80 border-slate-200/60 text-slate-700 hover:border-purple-300 hover:bg-white"
-                                            }`}
-                                        >
-                                            <span className="text-xs font-bold tracking-tight">
-                                                {st.showTime}
-                                            </span>
-                                            <span className={`text-[10px] font-medium ${isSelected ? "text-purple-200" : "text-slate-400"} mt-1`}>
-                                                {st.theater.name}
-                                            </span>
-                                        </button>
-                                    );
-                                })}
-                            </div>
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-2">
+                            <IoTimeOutline className="w-4 h-4 text-purple-600" />
+                            <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400">Choose Showtime</h3>
                         </div>
-                    )}
+                        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
+                            {getShowtimes().map((st) => {
+                                const isSelected = selectedShowtime?.id === st.id;
+                                return (
+                                    <button
+                                        key={st.id}
+                                        onClick={() => setSelectedShowtime(st)}
+                                        className={`flex flex-col items-center justify-center px-5 py-3 rounded-2xl border transition-all duration-300 cursor-pointer text-center select-none min-w-[100px]
+                                            ${isSelected
+                                            ? "bg-gradient-to-b from-purple-600 to-indigo-600 border-purple-600 text-white shadow-md shadow-purple-600/10 scale-102"
+                                            : "bg-white/80 border-slate-200/60 text-slate-700 hover:border-purple-300 hover:bg-white"
+                                        }`}
+                                    >
+                                        <span className="text-xs font-bold tracking-tight">
+                                            {st.showTime}
+                                        </span>
+                                        <span className={`text-[10px] font-medium ${isSelected ? "text-purple-200" : "text-slate-400"} mt-1`}>
+                                            {st.theater.name}
+                                        </span>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
                     
                     {/* Book Now Button */}
                     <div className="shrink-0 w-full md:w-auto">
                         <button
                             onClick={handleBooking}
-                            disabled={!selectedShowtime}
+                            disabled={!isBookingEnabled}
                             className="group relative h-12 w-full md:w-52 rounded-2xl text-xs font-black text-white tracking-wider uppercase
                                        bg-gradient-to-r from-purple-600 to-indigo-600
                                        shadow-[0_6px_20px_rgba(124,58,237,0.2)] hover:scale-102 active:scale-98
@@ -396,8 +397,6 @@ function MovieDetails() {
                         </button>
                     </div>
                 </div>
-
-
 
                 {/* 💡 You May Also Like Section */}
                 <div className="mt-16 pt-8 border-t border-slate-200/40">
