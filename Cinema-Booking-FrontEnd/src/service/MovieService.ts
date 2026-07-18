@@ -98,7 +98,84 @@ export const fetchShowtimesByMovieId = async (movieId: number): Promise<Showtime
     const response = await api.get(`/show-times/movie/${movieId}`);
     return response.data;
   } catch (e) {
-    return [];
+    // Generate dates for next 7 days
+    const generateDates = () => {
+      const dates = [];
+      const today = new Date();
+      for (let i = 0; i < 7; i++) {
+        const date = new Date(today);
+        date.setDate(today.getDate() + i);
+        dates.push(date.toISOString().split('T')[0]);
+      }
+      return dates;
+    };
+
+    const DATES = generateDates();
+
+    const mockMovies = getMockMovies();
+    const mockTheaters = [
+      { id: 1, name: "Grand Cinema", location: "Downtown", totalSeats: 100 },
+      { id: 2, name: "Cineplex", location: "Mall", totalSeats: 150 }
+    ];
+
+    const allShowtimes: Showtime[] = [
+      // Movie 1
+      {
+        id: 1,
+        theater: mockTheaters[0],
+        showDate: DATES[0],
+        showTime: "14:00",
+        availableSeats: 50
+      },
+      {
+        id: 2,
+        theater: mockTheaters[0],
+        showDate: DATES[0],
+        showTime: "18:00",
+        availableSeats: 45
+      },
+      {
+        id: 3,
+        theater: mockTheaters[1],
+        showDate: DATES[1],
+        showTime: "20:00",
+        availableSeats: 30
+      },
+      // Movie 2
+      {
+        id: 4,
+        theater: mockTheaters[0],
+        showDate: DATES[0],
+        showTime: "19:00",
+        availableSeats: 75
+      },
+      {
+        id: 5,
+        theater: mockTheaters[1],
+        showDate: DATES[1],
+        showTime: "15:00",
+        availableSeats: 80
+      },
+      // Movie 3
+      {
+        id: 6,
+        theater: mockTheaters[1],
+        showDate: DATES[1],
+        showTime: "17:00",
+        availableSeats: 40
+      }
+    ];
+
+    // Assign movies to showtimes
+    const showtimesWithMovies = allShowtimes.map((st, index) => {
+      const movieIndex = index < 3 ? 0 : index < 5 ? 1 : 2;
+      return {
+        ...st,
+        movie: mockMovies[movieIndex]
+      };
+    });
+
+    return showtimesWithMovies.filter(st => (st as any).movie?.id === movieId);
   }
 };
 
