@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchAllShowtimes, deleteShowtime, type Showtime } from '../service/AdminService';
-import { IoAddCircleOutline, IoTrashOutline, IoCalendarOutline, IoTimeOutline, IoLocationOutline, IoFilmOutline } from 'react-icons/io5';
+import { IoAddCircleOutline, IoTrashOutline} from 'react-icons/io5';
 
 function AdminListShowTimes() {
     const navigate = useNavigate();
