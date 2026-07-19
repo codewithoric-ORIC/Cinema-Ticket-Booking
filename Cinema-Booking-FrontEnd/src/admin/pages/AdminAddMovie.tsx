@@ -59,7 +59,7 @@ function AdminAddMovie() {
           <IoArrowBack className="w-5 h-5 text-slate-700" />
         </button>
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-800 tracking-tight">Add New Movie</h1>
+          <h1 className="text-2xl font-extrabold text-slate-800 tracking-tight mt-3">Add New Movie</h1>
           <p className="text-slate-500 mt-1 text-sm font-medium">Create a new movie to display on the home page</p>
         </div>
       </div>

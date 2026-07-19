@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { fetchAllBookings, updateBookingStatus, type Booking, type BookingSeat } from "../service/AdminService";
+import AdminBadge from "../components/AdminBadge";
 
 function AdminListBookings() {
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -56,7 +57,8 @@ function AdminListBookings() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-extrabold text-slate-800 tracking-tight">List Bookings</h1>
+        <AdminBadge text="Manage Bookings" />
+        <h1 className="text-2xl font-extrabold text-slate-800 tracking-tight mt-3">List Bookings</h1>
         <p className="text-slate-500 mt-1 text-sm font-medium">Manage all customer bookings.</p>
       </div>
 

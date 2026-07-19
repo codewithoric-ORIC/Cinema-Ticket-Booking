@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { fetchAllCasts, deleteCast } from "../service/AdminService";
 import { type Cast } from "../../service/MovieService";
 import { IoAddCircleOutline, IoTrashOutline } from "react-icons/io5";
+import AdminBadge from "../components/AdminBadge.tsx";
 
 function AdminListCasts() {
     const navigate = useNavigate();
@@ -46,6 +47,7 @@ function AdminListCasts() {
         <div className="space-y-8">
             <div className="flex items-center justify-between">
                 <div>
+                    <AdminBadge text="Movie Casts & Crew" />
                     <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight">Manage Casts</h1>
                     <p className="text-slate-500 mt-2 font-medium">Add, view, or delete movie cast members</p>
                 </div>

@@ -27,7 +27,9 @@ export default function LoginForm() {
 
         try {
             const response = await loginApicall(loginData);
+            console.log("=== Login response:", response.data);
             const { username: responseUsername, role, email, userId, phoneNumber, token } = response.data;
+            console.log("Extracted token:", token);
 
             if (responseUsername) setLogeedInUsername(responseUsername);
             if (role) setRoleName(role);

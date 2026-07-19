@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchAllShowtimes, deleteShowtime, type Showtime } from '../service/AdminService';
 import { IoAddCircleOutline, IoTrashOutline} from 'react-icons/io5';
+import AdminBadge from "../components/AdminBadge.tsx";
 
 function AdminListShowTimes() {
     const navigate = useNavigate();
@@ -46,6 +47,7 @@ function AdminListShowTimes() {
         <div className="space-y-8">
             <div className="flex items-center justify-between">
                 <div>
+                    <AdminBadge text="Movie Showtimes" />
                     <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight">Manage Showtimes</h1>
                     <p className="text-slate-500 mt-2 font-medium">Add, view, or delete movie showtimes</p>
                 </div>

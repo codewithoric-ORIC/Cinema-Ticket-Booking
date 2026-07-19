@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { fetchAllShowtimes, deleteShowtime } from "../service/AdminService";
 import { type Showtime } from "../service/AdminService";
 import { IoAddCircleOutline, IoTrashOutline } from "react-icons/io5";
+import AdminBadge from "../components/AdminBadge";
 
 function AdminListShows() {
   const navigate = useNavigate();
@@ -45,7 +46,8 @@ function AdminListShows() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-800 tracking-tight">List Shows</h1>
+          <AdminBadge text="Manage Shows" />
+          <h1 className="text-2xl font-extrabold text-slate-800 tracking-tight mt-3">List Shows</h1>
           <p className="text-slate-500 mt-1 text-sm font-medium">Manage all your showtimes.</p>
         </div>
         <button

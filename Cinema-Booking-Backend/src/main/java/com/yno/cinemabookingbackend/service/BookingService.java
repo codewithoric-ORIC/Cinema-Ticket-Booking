@@ -5,11 +5,13 @@ import com.yno.cinemabookingbackend.dto.response.*;
 import com.yno.cinemabookingbackend.entitiy.*;
 import com.yno.cinemabookingbackend.enumType.BookingStatus;
 import com.yno.cinemabookingbackend.repository.*;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -35,7 +37,12 @@ public class BookingService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public BookingResponse createBooking(CreateBookingRequest request, Authentication auth) {
+
+        if(request.getSeatIds() == null || request.getSeatIds().isEmpty()) {
+            throw new RuntimeException("Please select at least one seat to proceed checkout.");
+        }
 
         String username = auth.getName();
         User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
@@ -59,6 +66,10 @@ public class BookingService {
             bookingSeat.setBooking(saveBooking);
             bookingSeat.setSeat(seat);
             bookingSeatRepository.save(bookingSeat);
+            if (saveBooking.getBookingSeats() == null) {
+                saveBooking.setBookingSeats(new ArrayList<>());
+            }
+            saveBooking.getBookingSeats().add(bookingSeat);
         });
         return convertToBookingResponse(saveBooking);
     }
@@ -121,7 +132,8 @@ public class BookingService {
                 showTime.getMovie() != null ? showTime.getMovie().getTitle() : null,
                 showTime.getShowDate(),
                 formattedShowTime,
-                showTime.getAvailableSeats()
+                showTime.getAvailableSeats(),
+                null
         );
     }
 

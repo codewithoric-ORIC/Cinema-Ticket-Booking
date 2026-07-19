@@ -53,6 +53,7 @@ public class AuthService {
     }
 
     public AuthResponse login(LoginRequest request) {
+        System.out.println("=== AuthService.login called for user: " + request.getUsername());
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
         );
@@ -62,8 +63,9 @@ public class AuthService {
 
         // Generate JWT token
         String token = jwtUtil.generateToken(user.getUsername(), user.getId(), user.getRole().name());
+        System.out.println("Generated token: " + token);
 
-        return new AuthResponse(
+        AuthResponse response = new AuthResponse(
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),
@@ -72,5 +74,7 @@ public class AuthService {
                 "Logged in Successfully!",
                 token
         );
+        System.out.println("Returning response: " + response);
+        return response;
     }
 }

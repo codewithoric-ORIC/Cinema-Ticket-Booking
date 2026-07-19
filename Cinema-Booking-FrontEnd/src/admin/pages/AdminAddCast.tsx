@@ -4,6 +4,7 @@ import { createCast, fetchAllMovies } from "../service/AdminService";
 import { type Movie } from "../../service/MovieService";
 import { IoArrowBack, IoCheckmarkCircleOutline } from "react-icons/io5";
 
+
 function AdminAddCast() {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
@@ -52,7 +53,7 @@ function AdminAddCast() {
                     <IoArrowBack className="w-5 h-5 text-slate-700" />
                 </button>
                 <div>
-                    <h1 className="text-2xl font-extrabold text-slate-800 tracking-tight">Add New Cast Member</h1>
+                    <h1 className="text-2xl font-extrabold text-slate-800 tracking-tight mt-3">Add New Cast Member</h1>
                     <p className="text-slate-500 mt-1 text-sm font-medium">Add a new actor/actress to a movie</p>
                 </div>
             </div>

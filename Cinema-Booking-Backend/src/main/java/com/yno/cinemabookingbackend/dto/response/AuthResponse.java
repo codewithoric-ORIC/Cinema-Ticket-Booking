@@ -13,6 +13,6 @@ public class AuthResponse {
     private String email;
     private String role;
     private String phoneNumber;
-    private String Message;
+    private String message;
     private String token;
 }

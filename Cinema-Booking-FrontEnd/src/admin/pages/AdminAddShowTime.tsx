@@ -5,6 +5,7 @@ import { createShowtime, fetchAllMovies, fetchAllTheaters } from '../service/Adm
 import { type CreateShowtimeRequest } from '../service/AdminTypes';
 import { type Movie, type Theater } from '../../service/MovieService';
 import { IoArrowBack } from 'react-icons/io5';
+import AdminBadge from '../components/AdminBadge';
 
 function AdminAddShowTime() {
     const navigate = useNavigate();
@@ -81,7 +82,8 @@ function AdminAddShowTime() {
             </button>
 
             <div className="rounded-[2rem] bg-white/60 backdrop-blur-xl border border-white/80 p-8 shadow-[0_8px_24px_rgba(0,0,0,0.04),inset_0_1px_2px_rgba(255,255,255,0.8)]">
-                <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight mb-8">Add New Showtime</h1>
+                <AdminBadge text="Add Showtime" />
+                <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight mb-8 mt-3">Add New Showtime</h1>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

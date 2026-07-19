@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -29,7 +30,7 @@ public class Booking extends IdClass {
     private ShowTime showTime;
 
     @OneToMany(mappedBy = "booking",orphanRemoval = true)
-    private List<BookingSeat> bookingSeats;
+    private List<BookingSeat> bookingSeats = new ArrayList<>();
 
 
 

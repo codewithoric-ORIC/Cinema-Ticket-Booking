@@ -46,8 +46,8 @@ function Header() {
         }
     }, [location.pathname]);
 
-    const handleLogout = () => {
-        logout();
+    const handleLogout = async () => {
+        await logout();
         setLoggedIn(false);
         setUsername('');
         navigate('/');
@@ -87,9 +87,15 @@ function Header() {
             <nav className="max-w-7xl mx-auto relative z-50 pointer-events-auto">
                 <div className="flex items-center justify-between px-6 py-4">
 
-                    <div className="flex items-center gap-0 cursor-pointer" onClick={() => navigate('/')}>
-                        <span className="text-2xl font-black bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent drop-shadow-sm">Q</span>
-                        <span className="text-xl font-bold text-slate-800 tracking-tight">uickShow</span>
+                    {/*<div className="flex items-center gap-0 cursor-pointer" onClick={() => navigate('/')}>*/}
+                    {/*    <span className="text-2xl font-black bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent drop-shadow-sm">Q</span>*/}
+                    {/*    <span className="text-xl font-bold text-slate-800 tracking-tight">uickShow</span>*/}
+                    {/*</div>*/}
+                    <div className="flex items-center gap-3 mb-2 cursor-pointer" onClick={() => navigate('/')}>
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-purple-600/30">
+                            <IoTicket className="w-6 h-6 text-white" />
+                        </div>
+                        <span className="text-2xl font-black bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">Q<span className="text-xl font-bold text-slate-800 tracking-tight">uickShow</span></span>
                     </div>
 
                     <div

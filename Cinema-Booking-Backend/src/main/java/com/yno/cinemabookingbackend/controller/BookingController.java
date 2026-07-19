@@ -34,6 +34,9 @@ public class BookingController {
 
     @PostMapping
     public ResponseEntity<BookingResponse> createBooking(@RequestBody CreateBookingRequest request, Authentication authentication) {
+        System.out.println("=== BookingController.createBooking called");
+        System.out.println("Authentication: " + (authentication != null ? authentication.getName() : "null"));
+        System.out.println("Request: " + request);
         return ResponseEntity.ok(bookingService.createBooking(request, authentication));
     }
 

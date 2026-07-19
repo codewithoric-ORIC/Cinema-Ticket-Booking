@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { fetchAllMovies, fetchAllTheaters, createShowtime } from "../service/AdminService";
 import { type Movie } from "../../service/MovieService";
 import { type Theater } from "../service/AdminService";
+import AdminBadge from "../components/AdminBadge";
 
 function AdminAddShow() {
   const navigate = useNavigate();
@@ -54,7 +55,8 @@ function AdminAddShow() {
   return (
     <div className="max-w-xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-extrabold text-slate-800 tracking-tight">Add New Show</h1>
+        <AdminBadge text="Add Show" />
+        <h1 className="text-2xl font-extrabold text-slate-800 tracking-tight mt-3">Add New Show</h1>
         <p className="text-slate-500 mt-1 text-sm font-medium">Create a new showtime for a movie.</p>
       </div>
 

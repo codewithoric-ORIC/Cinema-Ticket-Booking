@@ -1,14 +1,17 @@
-import { getLogeedInUsername, getRoleName } from "../../auth/service/AuthService";
+import { getLogeedInUsername, getRoleName, getUser } from "../../auth/service/AuthService";
 import { IoPersonCircleOutline } from "react-icons/io5";
+import AdminBadge from "../components/AdminBadge";
 
 function AdminProfile() {
   const username = getLogeedInUsername();
   const role = getRoleName();
+  const user = getUser();
 
   return (
     <div className="max-w-xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-extrabold text-slate-800 tracking-tight">Profile</h1>
+        <AdminBadge text="Admin Profile" />
+        <h1 className="text-2xl font-extrabold text-slate-800 tracking-tight mt-3">Profile</h1>
         <p className="text-slate-500 mt-1 text-sm font-medium">View your admin profile.</p>
       </div>
 
@@ -28,11 +31,11 @@ function AdminProfile() {
         <div className="space-y-4">
           <div className="rounded-xl bg-white/50 p-4 border border-white/40">
             <label className="text-xs font-bold text-slate-500 mb-1.5 block">Email</label>
-            <p className="text-slate-800 text-sm font-medium">-</p>
+            <p className="text-slate-800 text-sm font-medium">{user?.email || '-'}</p>
           </div>
           <div className="rounded-xl bg-white/50 p-4 border border-white/40">
             <label className="text-xs font-bold text-slate-500 mb-1.5 block">Phone</label>
-            <p className="text-slate-800 text-sm font-medium">-</p>
+            <p className="text-slate-800 text-sm font-medium">{user?.phone || user?.phoneNumber || '-'}</p>
           </div>
         </div>
       </div>

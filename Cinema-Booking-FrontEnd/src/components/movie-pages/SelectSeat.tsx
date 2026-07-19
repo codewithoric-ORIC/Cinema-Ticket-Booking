@@ -79,8 +79,10 @@ function SelectSeat() {
     };
 
     const loadSeatsForShowtime = async (showTimeId: number) => {
+        console.log("Loading seats for ShowTime ID:", showTimeId);
         try {
             const seats = await getSoldSeatsForShow(showTimeId);
+            console.log("Seats received from API:", seats);
             setSeatsData(seats);
             const soldSeatNumbers = seats
                 .filter(seat => seat.isBooked)
@@ -117,10 +119,46 @@ function SelectSeat() {
     }, [id, showtime?.id]);
 
     useEffect(() => {
-        if (selectedShowtime?.id) {
-            loadSeatsForShowtime(selectedShowtime.id);
-        }
-    }, [selectedShowtime?.id]);
+        // Component စတက်လာတဲ့အချိန် တစ်ခါပဲ အလုပ်လုပ်အောင် useEffect ကို သုံးထားတာ မှန်ပါတယ်။
+        let isMounted = true; // 👈 Memory leak မဖြစ်အောင် ကာကွယ်ဖို့ ထည့်ပေးပါ
+
+        const loadData = async () => {
+            setLoading(true);
+            try {
+                if (id) {
+                    const movieData = await fetchMovieById(Number(id));
+                    const showtimesData = await fetchShowtimesByMovieId(Number(id));
+
+                    if (isMounted) {
+                        setMovie(movieData);
+                        setShowtimes(showtimesData);
+                    }
+                }
+                if (showtime?.id) {
+                    await loadSeatsForShowtime(showtime.id);
+                    if (isMounted) {
+                        // State တွေကို တစ်ဆက်တည်း ပြောင်းပေးလိုက်ပါ
+                        setSelectedShowtime(showtime);
+                        setSelectedTheater(showtime.theater);
+                    }
+                }
+            } catch (e) {
+                console.error("Failed to load data", e);
+            } finally {
+                if (isMounted) {
+                    setLoading(false);
+                }
+            }
+        };
+
+        loadData();
+
+        // 👈 Cleanup function ပြန်ထည့်ပေးပါ
+        return () => {
+            isMounted = false;
+        };
+    }, [id, showtime?.id, showtime]);
+// 👈 Dependency array ထဲမှာ showtime ကိုပါ ထည့်ပေးလိုက်ရင် ESLint Error ပျောက်သွားပါလိမ့်မယ်။
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -141,8 +179,14 @@ function SelectSeat() {
             if (bookedDate) {
                 setSelectedShowtime(selectedShowtime);
                 if (selectedShowtime.id) {
-                    getSoldSeatsForShow(selectedShowtime.id).then(seats => {
-                        const soldSeatNumbers = seats.map((seat: any) => `${seat.rowChar}${seat.col}`);
+                    // 🚨 ဒီအောက်က .then ထဲမှာ (seats: APISeat[]) နဲ့ (seat: APISeat) လို့ ပြောင်းပေးပါ
+                    getSoldSeatsForShow(selectedShowtime.id).then((seats: APISeat[]) => {
+                        console.log("Seats fetched in handleBooking:", seats);
+                        setSeatsData(seats);
+                        const soldSeatNumbers = seats
+                            .filter((seat: APISeat) => seat.isBooked === true)
+                            .map((seat: APISeat) => `${seat.rowChar}${seat.col}`);
+
                         setSoldSeats(soldSeatNumbers);
                         setSelectedSeats([]);
                     });
@@ -156,13 +200,34 @@ function SelectSeat() {
             alert("Please select at least one seat to proceed!");
             return;
         }
+
+        // 🚨 ၁။ UI မှာ ရွေးထားတဲ့ ခုံတွေကို စစ်ကြည့်မယ်
+        console.log("၁။ UI ကနေ ရွေးထားသော ခုံများ (selectedSeats):", selectedSeats);
+
+        // 🚨 ၂။ Backend ကနေ ရလာတဲ့ ခုံအချက်အလက် အားလုံးကို စစ်ကြည့်မယ်
+        console.log("၂။ Backend ကနေ ရလာသော ခုံ Data အားလုံး (seatsData):", seatsData);
+
         const currentShowtime = selectedShowtime || showtime;
         const currentDate = selectedDate ? AVAILABLE_DATES.find(d => d.fullDate === selectedDate) : { date: movieDate, day: movieDay };
         const currentTheater = selectedTheater || (showtime ? showtime.theater : null);
+
         // Map selected seat numbers to seat ids
         const selectedSeatIds = seatsData
-            .filter(seat => selectedSeats.includes(`${seat.rowChar}${seat.col}`))
+            .filter(seat =>
+                selectedSeats.includes(`${seat.rowChar}${seat.col}`) ||
+                selectedSeats.includes(seat.seatNumber)
+            )
             .map(seat => seat.id);
+
+        // 🚨 ၃။ Filter လုပ်ပြီး ထွက်လာတဲ့ ID တွေကို စစ်ကြည့်မယ်
+        console.log("၃။ Match ဖြစ်သွားသော Seat IDs များ (selectedSeatIds):", selectedSeatIds);
+
+        // Database ထဲမှာ ခုံမရှိရင် Checkout ဆီ မပို့ဘဲ တားထားမယ်
+        if (selectedSeatIds.length === 0) {
+            alert("Error: သင့် Backend Database ထဲတွင် ဒီ Showtime အတွက် ခုံများ Generate လုပ်ထားခြင်း မရှိသေးပါ။ (Console ကို ကြည့်ပါ)");
+            return;
+        }
+
         navigate('/checkout', {
             state: {
                 movie: movie,
@@ -199,7 +264,7 @@ function SelectSeat() {
                 onClick={() => handleSeatClick(seatId)}
                 className={`w-8 h-8 rounded-lg text-[10px] font-black border flex items-center justify-center transition-all duration-300 cursor-pointer shadow-2xs
                     ${isSold
-                    ? "bg-slate-100 border-slate-200 text-slate-300 cursor-not-allowed shadow-none"
+                    ? "bg-red-200 border-red-300 text-red-400 cursor-not-allowed shadow-none"
                     : isSelected
                         ? "bg-gradient-to-br from-purple-600 to-indigo-600 text-white border-purple-600 scale-105 shadow-md shadow-purple-600/20"
                         : "bg-white border-slate-200 text-slate-700 hover:border-purple-400 hover:text-purple-600 hover:scale-105"
@@ -415,7 +480,7 @@ function SelectSeat() {
                         <div className="flex justify-center gap-4 mt-6 pt-4 border-t border-slate-100 w-full text-[10px] font-bold text-slate-400">
                             <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-md bg-white border border-slate-200"></div> Available</div>
                             <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-md bg-gradient-to-br from-purple-600 to-indigo-600"></div> Selected</div>
-                            <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-md bg-slate-100 border border-slate-200"></div> Sold</div>
+                            <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-md bg-red-200 border border-red-300"></div> Sold</div>
                         </div>
                     </div>
 

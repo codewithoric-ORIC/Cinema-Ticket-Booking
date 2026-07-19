@@ -119,7 +119,7 @@ function MyBookings() {
             </p>
             <Link
               to="/movies"
-              className="group relative inline-flex h-12 px-8 rounded-full text-sm font-bold text-white
+              className="items-center justify-center group relative inline-flex h-12 px-8 rounded-full text-sm font-bold text-white
                                      bg-gradient-to-r from-purple-600 to-indigo-600
                                      shadow-[0_4px_12px_rgba(124,58,237,0.15),inset_0_1px_1px_rgba(255,255,255,0.3)]
                                      hover:scale-105 hover:shadow-[0_8px_20px_rgba(124,58,237,0.25)]

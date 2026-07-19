@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { fetchAllTrailers, deleteTrailer } from "../service/AdminService";
 import { type Trailer } from "../../service/MovieService";
 import { IoAddCircleOutline, IoTrashOutline, IoPlayCircleOutline } from "react-icons/io5";
+import AdminBadge from "../components/AdminBadge.tsx";
 
 function AdminListTrailers() {
   const navigate = useNavigate();
@@ -45,6 +46,7 @@ function AdminListTrailers() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
+          <AdminBadge text="Movie Trailers" />
           <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight">Manage Trailers</h1>
           <p className="text-slate-500 mt-2 font-medium">Add, view, or delete movie trailers</p>
         </div>

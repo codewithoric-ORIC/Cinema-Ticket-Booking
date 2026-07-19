@@ -101,7 +101,7 @@ function Home() {
                 className="w-full min-h-screen relative flex items-center px-6 pt-28 pb-20 transition-all duration-1000 ease-in-out bg-cover bg-center overflow-hidden"
                 style={{backgroundImage: `url(${currentMovie.imageUrl})`}}
             >
-                <div className="absolute inset-0 backdrop-blur-3xl bg-white/40 transition-all duration-1000"/>
+                <div className="absolute inset-0 backdrop-blur-xl bg-white/40 transition-all duration-90"/>
                 <div className="absolute inset-0 bg-gradient-to-t from-white via-white/80 to-white/40"/>
 
                 <div

@@ -29,10 +29,10 @@ function MovieTrailers() {
             try {
                 const data = JSON.parse(event.data);
                 if (data.event === "infoDelivery" && data.info && data.info.playerState === 0) {
-                    setActiveIndex((prevIndex) => (prevIndex + 1) % trailers.length);
+                    setActiveIndex((prevIndex) => (prevIndex + 1) % Math.min(trailers.length, 4));
                 }
-            } catch (e) {
-
+            } catch {
+                // Ignore non-JSON messages from YouTube
             }
         };
 
@@ -95,12 +95,13 @@ function MovieTrailers() {
                     </div>
 
                     <div className="lg:col-span-4 flex flex-col space-y-3 max-h-[420px] lg:max-h-none overflow-y-auto pr-1">
-                        {trailers.map((trailer, index) => {
-                            const isActive = index === activeIndex;
+                        {trailers.slice(-4).map((trailer, index) => {
+                            const actualIndex = trailers.length - 4 + index;
+                            const isActive = actualIndex === activeIndex;
                             return (
                                 <button
                                     key={trailer.id}
-                                    onClick={() => setActiveIndex(index)}
+                                    onClick={() => setActiveIndex(actualIndex)}
                                     className={`w-full flex items-center gap-3.5 p-2.5 rounded-[1.4rem] transition-all duration-300 text-left cursor-pointer border group
                                         ${isActive
                                             ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md border-transparent"

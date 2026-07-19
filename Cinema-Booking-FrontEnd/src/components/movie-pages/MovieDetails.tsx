@@ -73,6 +73,11 @@ function MovieDetails() {
 
     // 💡 Navigate to Select Seat page
     const handleBooking = () => {
+        if (!isLoggedIn()) {
+            alert("Please log in to buy tickets!");
+            navigate('/login');
+            return;
+        }
         navigate(`/select-seat/${movie.id}`);
     };
 

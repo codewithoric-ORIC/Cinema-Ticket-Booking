@@ -18,7 +18,7 @@ public class ShowTime extends IdClass {
     private LocalTime showTime;
     private Integer availableSeats;
 
-    @OneToMany(mappedBy = "showTime")
+    @OneToMany(mappedBy = "showTime", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Seat> seats;
 
     @OneToMany(mappedBy = "showTime")

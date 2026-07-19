@@ -44,11 +44,15 @@ export const isAdmin = () => {
 };
 
 export const setToken = (token: string) => {
+    console.log("=== setToken called with token:", token);
     sessionStorage.setItem("token", token);
+    console.log("Token saved to sessionStorage, now has:", sessionStorage.getItem("token"));
 };
 
 export const getToken = () => {
-    return sessionStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
+    console.log("=== getToken called, returning:", token);
+    return token;
 };
 
 export const logout = async () => {

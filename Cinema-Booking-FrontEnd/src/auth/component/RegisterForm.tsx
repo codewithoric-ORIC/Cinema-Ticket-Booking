@@ -37,7 +37,7 @@ export default function RegisterForm() {
             setUser({ username: responseUsername, email: responseEmail, userId: userId, role: role, phoneNumber: phoneNumber });
 
             setSuccess(response.data.message || 'Registration Successful!');
-            setTimeout(() => navigate('/'), 1500);
+            setTimeout(() => navigate('/login'), 1500);
         } catch (err: any) {
             console.error('Registration error:', err);
             const errorMsg =

@@ -25,13 +25,13 @@ function AdminLayout() {
     { path: "/admin/profile", label: "Profile", icon: IoPersonOutline },
   ];
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate("/");
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-50 relative overflow-hidden">
+    <div className="flex h-screen bg-slate-50 relative overflow-hidden">
       {/* Background Gradient Blobs for Liquid Effect */}
       <div className="absolute top-1/4 left-[10%] w-80 h-80 bg-purple-400/15 rounded-full blur-[100px] pointer-events-none"></div>
       <div className="absolute bottom-1/3 right-[5%] w-96 h-96 bg-indigo-400/20 rounded-full blur-[120px] pointer-events-none"></div>
@@ -43,10 +43,7 @@ function AdminLayout() {
           {/* Logo Section */}
           <div className="p-6 border-b border-white/30">
             <Link to="/" className="flex items-center gap-2">
-              <span className="text-2xl font-black bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent drop-shadow-sm">
-                Q
-              </span>
-              <span className="text-xl font-bold text-slate-800 tracking-tight">uickShow Admin</span>
+              <span className="text-2xl font-black bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">Q<span className="text-xl font-bold text-slate-800 tracking-tight">uickShow Admin</span></span>
             </Link>
           </div>
 
