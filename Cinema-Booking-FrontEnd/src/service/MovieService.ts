@@ -39,9 +39,20 @@ export interface Showtime {
     id: number;
     theater: Theater;
     movie?: Movie;
+    movieId?: number;
+    movieTitle?: string;
     showDate: string;
     showTime: string;
     availableSeats: number;
+    seats?: Array<{
+        id: number;
+        seatNumber: string;
+        rowChar: string;
+        col: number;
+        price: number;
+        isBooked: boolean;
+        isReserved: boolean;
+    }>;
 }
 
 export interface Trailer {
@@ -235,11 +246,26 @@ export const fetchMoviesByTheaterId = async (theaterId: number): Promise<Movie[]
 };
 
 export const fetchTrailersByMovieId = async (movieId: number): Promise<Trailer[]> => {
-  try {
-    const response = await api.get(`/trailers/movie/${movieId}`);
-    return response.data;
-  } catch (e) {
-    const trailers = getMockTrailers();
-    return trailers.filter(t => t.movie?.id === movieId);
-  }
+    try {
+        const response = await api.get(`/trailers/movie/${movieId}`);
+        return response.data;
+    } catch (e) {
+        const trailers = getMockTrailers();
+        return trailers.filter(t => t.movie?.id === movieId);
+    }
+};
+
+export interface FavouriteResponse {
+    id: number;
+    movie: Movie;
+}
+
+export const fetchUserFavourites = async (): Promise<Movie[]> => {
+    try {
+        const response = await api.get(`/favourites`);
+        return response.data.map((fav: FavouriteResponse) => fav.movie);
+    } catch (e) {
+        console.error("Failed to load favourites:", e);
+        return [];
+    }
 };

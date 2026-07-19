@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { IoLocationOutline, IoStar, IoArrowForward, IoFilmOutline } from "react-icons/io5";
+import { IoLocationOutline, IoArrowForward, IoFilmOutline } from "react-icons/io5";
 import { fetchAllTheaters, type Theater } from "../../service/MovieService";
 
 function TheaterList() {
@@ -31,17 +31,19 @@ function TheaterList() {
   }
 
   return (
-    <div className="w-full min-h-screen bg-slate-100 overflow-x-hidden relative pt-28 pb-20">
+    <div className="w-full min-h-screen bg-slate-50 overflow-x-hidden relative pt-28 pb-20">
       <div className="absolute top-1/4 left-[-5%] w-[500px] h-[500px] bg-purple-500/15 rounded-full blur-[140px] pointer-events-none" />
       <div className="absolute top-2/3 right-[-5%] w-[500px] h-[500px] bg-indigo-500/15 rounded-full blur-[140px] pointer-events-none" />
 
       <div className="relative z-10 max-w-7xl mx-auto px-6">
         <div className="mb-8 space-y-2">
+          <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-purple-600/[0.08] border border-purple-500/20 shadow-sm backdrop-blur-md mb-4">
+            <span className="text-xs font-bold uppercase tracking-widest text-purple-700">Theaters</span>
+          </div>
           <h1 className="text-4xl font-black text-slate-900 tracking-tight">Select Theater</h1>
           <p className="text-slate-500 text-sm font-semibold">Choose your preferred location to watch movies</p>
         </div>
-
-        <div className="w-full rounded-[2.5rem] p-6 md:p-8">
+ <div className="w-full rounded-[2.5rem] p-6 md:p-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-6xl mx-auto">
             {theaters.map((theater) => (
               <div

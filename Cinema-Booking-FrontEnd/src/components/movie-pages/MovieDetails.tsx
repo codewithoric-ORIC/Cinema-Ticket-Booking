@@ -1,4 +1,4 @@
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import {
     IoStar,
@@ -9,24 +9,17 @@ import {
     IoArrowBack,
     IoTimeOutline,
     IoFilmOutline,
-    IoCalendarOutline,
     IoClose,
-    IoLocationOutline
 } from "react-icons/io5";
-import { fetchMovieById, fetchShowtimesByMovieId, checkIsFavourite, addToFavourites, removeFromFavourites, type Movie, type Showtime, type Trailer, type Theater } from "../../service/MovieService";
+import { fetchMovieById, checkIsFavourite, addToFavourites, removeFromFavourites, type Movie, type Trailer } from "../../service/MovieService";
 import { fetchAllMovies } from "../../service/MovieService";
+import { isLoggedIn } from "../../auth/service/AuthService";
 
 function MovieDetails() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const location = useLocation();
-    const { theaterId } = location.state || {};
     const [isFavorite, setIsFavorite] = useState<boolean>(false);
-    const [selectedTheater, setSelectedTheater] = useState<Theater | null>(null);
-    const [selectedDate, setSelectedDate] = useState<string>("");
-    const [selectedShowtime, setSelectedShowtime] = useState<Showtime | null>(null);
     const [movie, setMovie] = useState<Movie | null>(null);
-    const [showtimes, setShowtimes] = useState<Showtime[]>([]);
     const [recommendedMovies, setRecommendedMovies] = useState<Movie[]>([]);
     const [loading, setLoading] = useState(true);
     const [showTrailerModal, setShowTrailerModal] = useState<boolean>(false);
@@ -37,60 +30,6 @@ function MovieDetails() {
         const hours = Math.floor(minutes / 60);
         const mins = minutes % 60;
         return `${hours}h ${mins}m`;
-    };
-
-    // Generate dates for next 7 days
-    const generateAvailableDates = () => {
-        const dates = [];
-        const today = new Date();
-        const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-        
-        for (let i = 0; i < 7; i++) {
-            const date = new Date(today);
-            date.setDate(today.getDate() + i);
-            dates.push({
-                id: i + 1,
-                day: days[date.getDay()],
-                date: `${date.getDate()} ${date.toLocaleString('default', { month: 'short' })}`,
-                fullDate: date.toISOString().split('T')[0]
-            });
-        }
-        return dates;
-    };
-
-    const AVAILABLE_DATES = generateAvailableDates();
-
-    // Get unique theaters from showtimes
-    const availableTheaters = () => {
-        const uniqueTheaters = new Map<number, Theater>();
-        showtimes.forEach(st => {
-            if (!uniqueTheaters.has(st.theater.id)) {
-                uniqueTheaters.set(st.theater.id, st.theater);
-            }
-        });
-        return Array.from(uniqueTheaters.values());
-    };
-
-    // Get unique dates from showtimes (filtered by theater if selected)
-    const availableDatesFromShowtimes = () => {
-        const uniqueDates = new Set<string>();
-        const filteredShowtimes = selectedTheater 
-            ? showtimes.filter(st => st.theater.id === selectedTheater.id) 
-            : showtimes;
-        filteredShowtimes.forEach(st => uniqueDates.add(st.showDate));
-        return AVAILABLE_DATES.filter(d => uniqueDates.has(d.fullDate));
-    };
-
-    // Get showtimes (filtered by theater and date if selected)
-    const getShowtimes = () => {
-        let filteredShowtimes = showtimes;
-        if (selectedTheater) {
-            filteredShowtimes = filteredShowtimes.filter(st => st.theater.id === selectedTheater.id);
-        }
-        if (selectedDate) {
-            filteredShowtimes = filteredShowtimes.filter(st => st.showDate === selectedDate);
-        }
-        return filteredShowtimes;
     };
 
     useEffect(() => {
@@ -105,17 +44,6 @@ function MovieDetails() {
                     const movieData = await fetchMovieById(Number(id));
                     setMovie(movieData);
                     
-                    const showtimesData = await fetchShowtimesByMovieId(Number(id));
-                    setShowtimes(showtimesData);
-
-                    // If theaterId is passed in, pre-select that theater
-                    if (theaterId) {
-                        const theater = showtimesData.find(st => st.theater.id === Number(theaterId))?.theater;
-                        if (theater) {
-                            setSelectedTheater(theater);
-                        }
-                    }
-                    
                     const isFav = await checkIsFavourite(Number(id));
                     setIsFavorite(isFav);
                     
@@ -129,7 +57,7 @@ function MovieDetails() {
             }
         };
         loadData();
-    }, [id, theaterId]);
+    }, [id]);
 
     if (loading) {
         return (
@@ -143,28 +71,17 @@ function MovieDetails() {
         return <div className="min-h-screen flex items-center justify-center text-slate-800 font-bold">Movie not found!</div>;
     }
 
-    // Check if all selections are made to enable booking
-    const isBookingEnabled = selectedTheater && selectedDate && selectedShowtime;
-
-    // 💡 This is where we pass data to Select Seat
+    // 💡 Navigate to Select Seat page
     const handleBooking = () => {
-        if (selectedShowtime) {
-            const bookedDate = AVAILABLE_DATES.find(d => d.fullDate === selectedShowtime.showDate);
-            if (bookedDate) {
-                navigate(`/select-seat/${movie.id}`, { 
-                    state: { 
-                        date: bookedDate.date, 
-                        day: bookedDate.day,
-                        showtime: selectedShowtime,
-                        theater: selectedShowtime.theater
-                    } 
-                });
-            }
-        }
+        navigate(`/select-seat/${movie.id}`);
     };
 
     const handleToggleFavorite = async () => {
         if (!id) return;
+        if (!isLoggedIn()) {
+            alert("Please log in to add favorites!");
+            return;
+        }
         try {
             if (isFavorite) {
                 await removeFromFavourites(Number(id));
@@ -174,7 +91,8 @@ function MovieDetails() {
                 setIsFavorite(true);
             }
         } catch (e) {
-            console.error("Failed to toggle favourite:", e);
+            console.error("Failed to toggle favourite", e);
+            alert("Failed to update favorites. Please try again.");
         }
     };
 
@@ -240,12 +158,11 @@ function MovieDetails() {
                                 {/* 💡 Buy Ticket Button */}
                                 <button
                                     onClick={handleBooking}
-                                    disabled={!isBookingEnabled}
                                     className="group relative h-10 px-6 rounded-xl text-[11px] font-bold text-white
                                                bg-gradient-to-r from-purple-600 to-indigo-600
                                                shadow-[0_4px_12px_rgba(124,58,237,0.15),inset_0_1px_1px_rgba(255,255,255,0.3)]
                                                hover:scale-105 hover:shadow-[0_8px_20px_rgba(124,58,237,0.25)]
-                                               active:scale-98 transition-all duration-300 ease-out overflow-hidden flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                                               active:scale-98 transition-all duration-300 ease-out overflow-hidden flex items-center gap-1.5 cursor-pointer"
                                 >
                                     <span className="absolute inset-x-0 top-0 h-[40%] bg-gradient-to-b from-white/20 to-transparent rounded-t-full pointer-events-none" />
                                     <span className="absolute -inset-full bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 transition-all duration-1000 group-hover:left-full ease-out" />
@@ -255,127 +172,6 @@ function MovieDetails() {
 
                                 <button onClick={handleToggleFavorite} className={`h-10 w-10 rounded-xl border flex items-center justify-center transition-all active:scale-95 cursor-pointer shadow-2xs ${isFavorite ? "bg-rose-50 border-rose-200 text-rose-500" : "bg-white border-slate-200 text-slate-400 hover:text-rose-500 hover:border-rose-200"}`}>
                                     {isFavorite ? <IoHeart className="w-4 h-4" /> : <IoHeartOutline className="w-4 h-4"/>}
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* 🎬 Booking Section (Compact Layout) */}
-                        <div className="bg-white/60 backdrop-blur-xl rounded-[1.5rem] p-6 border border-white/80 shadow-[0_4px_12px_rgba(0,0,0,0.02),inset_0_1px_2px_rgba(255,255,255,0.6)]">
-                            <h3 className="text-lg font-bold text-slate-800 mb-6">Select Your Show</h3>
-                            
-                            {/* Theater Selection */}
-                            <div className="space-y-3 mb-6">
-                                <div className="flex items-center gap-2">
-                                    <IoLocationOutline className="w-4 h-4 text-purple-600" />
-                                    <h4 className="text-sm font-bold uppercase tracking-wider text-slate-400">Choose Theater</h4>
-                                </div>
-                                <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
-                                    {availableTheaters().map((theater) => {
-                                        const isSelected = selectedTheater?.id === theater.id;
-                                        return (
-                                            <button
-                                                key={theater.id}
-                                                onClick={() => {
-                                                    setSelectedTheater(theater);
-                                                    setSelectedShowtime(null);
-                                                }}
-                                                className={`flex flex-col items-center justify-center p-2.5 min-w-[110px] h-[65px] rounded-2xl border transition-all duration-300 cursor-pointer text-center select-none shrink-0
-                                                    ${isSelected
-                                                    ? "bg-gradient-to-b from-purple-600 to-indigo-600 border-purple-600 text-white shadow-md shadow-purple-600/10 scale-102"
-                                                    : "bg-white/80 border-slate-200/60 text-slate-700 hover:border-purple-300 hover:bg-white"
-                                                }`}
-                                            >
-                                                <span className={`text-[10px] font-bold tracking-wide uppercase ${isSelected ? "text-purple-200" : "text-slate-400"}`}>
-                                                    {theater.location}
-                                                </span>
-                                                <span className="text-xs font-extrabold tracking-tight mt-1 line-clamp-1">
-                                                    {theater.name}
-                                                </span>
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-
-                            {/* Date Selection */}
-                            <div className="space-y-3 mb-6">
-                                <div className="flex items-center gap-2">
-                                    <IoCalendarOutline className="w-4 h-4 text-purple-600" />
-                                    <h4 className="text-sm font-bold uppercase tracking-wider text-slate-400">Choose Date</h4>
-                                </div>
-                                <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
-                                    {availableDatesFromShowtimes().map((d) => {
-                                        const isSelected = selectedDate === d.fullDate;
-                                        return (
-                                            <button
-                                                key={d.id}
-                                                onClick={() => {
-                                                    setSelectedDate(d.fullDate);
-                                                    setSelectedShowtime(null);
-                                                }}
-                                                className={`flex flex-col items-center justify-center p-2.5 min-w-[60px] h-[65px] rounded-2xl border transition-all duration-300 cursor-pointer text-center select-none shrink-0
-                                                    ${isSelected
-                                                    ? "bg-gradient-to-b from-purple-600 to-indigo-600 border-purple-600 text-white shadow-md shadow-purple-600/10 scale-102"
-                                                    : "bg-white/80 border-slate-200/60 text-slate-700 hover:border-purple-300 hover:bg-white"
-                                                }`}
-                                            >
-                                                <span className={`text-[10px] font-bold tracking-wide uppercase ${isSelected ? "text-purple-200" : "text-slate-400"}`}>
-                                                    {d.day}
-                                                </span>
-                                                <span className="text-xs font-extrabold tracking-tight mt-1">
-                                                    {d.date}
-                                                </span>
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                            
-                            {/* Showtimes Section */}
-                            <div className="space-y-3 mb-6">
-                                <div className="flex items-center gap-2">
-                                    <IoTimeOutline className="w-4 h-4 text-purple-600" />
-                                    <h4 className="text-sm font-bold uppercase tracking-wider text-slate-400">Choose Showtime</h4>
-                                </div>
-                                <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
-                                    {getShowtimes().map((st) => {
-                                        const isSelected = selectedShowtime?.id === st.id;
-                                        return (
-                                            <button
-                                                key={st.id}
-                                                onClick={() => setSelectedShowtime(st)}
-                                                className={`flex flex-col items-center justify-center px-4 py-2.5 rounded-2xl border transition-all duration-300 cursor-pointer text-center select-none min-w-[90px] shrink-0
-                                                    ${isSelected
-                                                    ? "bg-gradient-to-b from-purple-600 to-indigo-600 border-purple-600 text-white shadow-md shadow-purple-600/10 scale-102"
-                                                    : "bg-white/80 border-slate-200/60 text-slate-700 hover:border-purple-300 hover:bg-white"
-                                                }`}
-                                            >
-                                                <span className="text-sm font-bold tracking-tight">
-                                                    {st.showTime}
-                                                </span>
-                                                <span className={`text-[10px] font-medium ${isSelected ? "text-purple-200" : "text-slate-400"} mt-0.5`}>
-                                                    {st.theater.name}
-                                                </span>
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                            
-                            {/* Book Now Button */}
-                            <div>
-                                <button
-                                    onClick={handleBooking}
-                                    disabled={!isBookingEnabled}
-                                    className="group relative h-12 w-full rounded-2xl text-sm font-black text-white tracking-wider uppercase
-                                               bg-gradient-to-r from-purple-600 to-indigo-600
-                                               shadow-[0_6px_20px_rgba(124,58,237,0.2)] hover:scale-[1.01] active:scale-98
-                                               transition-all duration-300 overflow-hidden flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-                                >
-                                    <span className="absolute inset-x-0 top-0 h-[40%] bg-gradient-to-b from-white/20 to-transparent rounded-t-full pointer-events-none" />
-                                    <span className="absolute -inset-full bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 transition-all duration-1000 group-hover:left-full ease-out" />
-                                    <IoTicket className="w-5 h-5 text-purple-200 group-hover:rotate-12 transition-transform" />
-                                    <span>Book Now</span>
                                 </button>
                             </div>
                         </div>

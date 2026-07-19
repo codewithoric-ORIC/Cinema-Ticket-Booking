@@ -1,7 +1,9 @@
 package com.yno.cinemabookingbackend.controller;
 
 import com.yno.cinemabookingbackend.dto.request.CreateBookingRequest;
-import com.yno.cinemabookingbackend.entitiy.Booking;
+import com.yno.cinemabookingbackend.dto.response.BookingResponse;
+import com.yno.cinemabookingbackend.entitiy.User;
+import com.yno.cinemabookingbackend.repository.UserRepository;
 import com.yno.cinemabookingbackend.service.BookingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,26 +18,27 @@ import java.util.List;
 @CrossOrigin(origins = "http://localhost:5173")
 public class BookingController {
     private final BookingService bookingService;
+    private final UserRepository userRepository;
 
     @GetMapping
-    public ResponseEntity<List<Booking>> getAllBookings() {
+    public ResponseEntity<List<BookingResponse>> getAllBookings() {
         return ResponseEntity.ok(bookingService.getAllBookings());
     }
 
     @GetMapping("/user")
-    public ResponseEntity<List<Booking>> getUserBookings(Authentication authentication) {
+    public ResponseEntity<List<BookingResponse>> getUserBookings(Authentication authentication) {
         String username = authentication.getName();
-        // You can get user from userRepository and then get bookings
-        return ResponseEntity.ok().build();
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
+        return ResponseEntity.ok(bookingService.getBookingsByUserId(user.getId()));
     }
 
     @PostMapping
-    public ResponseEntity<Booking> createBooking(@RequestBody CreateBookingRequest request, Authentication authentication) {
+    public ResponseEntity<BookingResponse> createBooking(@RequestBody CreateBookingRequest request, Authentication authentication) {
         return ResponseEntity.ok(bookingService.createBooking(request, authentication));
     }
 
     @PutMapping("/{id}/status")
-    public ResponseEntity<Booking> updateBookingStatus(@PathVariable Long id, @RequestParam String status) {
+    public ResponseEntity<BookingResponse> updateBookingStatus(@PathVariable Long id, @RequestParam String status) {
         return ResponseEntity.ok(bookingService.updateBookingStatus(id, status));
     }
 }

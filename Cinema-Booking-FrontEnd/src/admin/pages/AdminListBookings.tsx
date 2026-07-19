@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-import { fetchAllBookings, updateBookingStatus } from "../service/AdminService";
-import { type Booking } from "../service/AdminService";
+import { fetchAllBookings, updateBookingStatus, type Booking, type BookingSeat } from "../service/AdminService";
 
 function AdminListBookings() {
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -42,6 +41,10 @@ function AdminListBookings() {
     }
   };
 
+  const getSeatNumbers = (seats: BookingSeat[] = []) => {
+    return seats.map(s => `${s.rowChar}${s.col}`).join(", ");
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -57,13 +60,16 @@ function AdminListBookings() {
         <p className="text-slate-500 mt-1 text-sm font-medium">Manage all customer bookings.</p>
       </div>
 
-      <div className="rounded-2xl bg-white/60 backdrop-blur-xl border border-white/80 shadow-[0_8px_24px_rgba(0,0,0,0.04),inset_0_1px_2px_rgba(255,255,255,0.8)] overflow-hidden">
-        <table className="w-full">
+      <div className="rounded-2xl bg-white/60 backdrop-blur-xl border border-white/80 shadow-[0_8px_24px_rgba(0,0,0,0.04),inset_0_1px_2px_rgba(255,255,255,0.8)] overflow-x-auto">
+        <table className="w-full min-w-[800px]">
           <thead className="bg-white/50 border-b border-white/50">
             <tr>
               <th className="text-left px-6 py-4 text-xs font-bold text-slate-700">ID</th>
               <th className="text-left px-6 py-4 text-xs font-bold text-slate-700">Reference</th>
               <th className="text-left px-6 py-4 text-xs font-bold text-slate-700">Movie</th>
+              <th className="text-left px-6 py-4 text-xs font-bold text-slate-700">Theater</th>
+              <th className="text-left px-6 py-4 text-xs font-bold text-slate-700">Show Time</th>
+              <th className="text-left px-6 py-4 text-xs font-bold text-slate-700">Seats</th>
               <th className="text-left px-6 py-4 text-xs font-bold text-slate-700">Amount</th>
               <th className="text-left px-6 py-4 text-xs font-bold text-slate-700">Status</th>
               <th className="text-left px-6 py-4 text-xs font-bold text-slate-700">Actions</th>
@@ -74,16 +80,21 @@ function AdminListBookings() {
               <tr key={booking.id} className="hover:bg-white/40 transition-colors duration-300">
                 <td className="px-6 py-4 text-xs text-slate-700">{booking.id}</td>
                 <td className="px-6 py-4 text-xs font-semibold text-slate-800">{booking.bookingReference}</td>
-                <td className="px-6 py-4 text-xs text-slate-700">{booking.showtime.movie.title}</td>
-                <td className="px-6 py-4 text-xs text-slate-700">${booking.totalAmount.toFixed(2)}</td>
+                <td className="px-6 py-4 text-xs text-slate-700">{booking.showTime?.movie?.title || "Unknown Movie"}</td>
+                <td className="px-6 py-4 text-xs text-slate-700">{booking.showTime?.theater?.name || "Unknown"}</td>
+                <td className="px-6 py-4 text-xs text-slate-700">
+                  {booking.showTime?.showDate} {booking.showTime?.showTime}
+                </td>
+                <td className="px-6 py-4 text-xs text-slate-700">{getSeatNumbers(booking.seats)}</td>
+                <td className="px-6 py-4 text-xs text-slate-700">{booking.totalAmount.toLocaleString()} MMK</td>
                 <td className="px-6 py-4">
-                  <span className={`px-3 py-1 rounded-full text-[10px] font-bold ${getStatusColor(booking.status)}`}>
-                    {booking.status}
+                  <span className={`px-3 py-1 rounded-full text-[10px] font-bold ${getStatusColor(booking.bookingStatus)}`}>
+                    {booking.bookingStatus}
                   </span>
                 </td>
                 <td className="px-6 py-4">
                   <select
-                    value={booking.status}
+                    value={booking.bookingStatus}
                     onChange={(e) => handleStatusChange(booking.id, e.target.value)}
                     className="px-3 py-2 rounded-lg border border-slate-300 text-xs bg-white/70 focus:outline-none focus:border-purple-500 transition-all duration-300"
                   >

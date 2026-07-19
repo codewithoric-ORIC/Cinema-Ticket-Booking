@@ -78,7 +78,7 @@ public class CinemaBookingBackendApplication {
                 movie2.setIsActive(true);
                 movie2 = movieRepository.save(movie2);
 
-                // Add an upcoming movie
+                // Add upcoming movies
                 movie3 = new Movie();
                 movie3.setTitle("Avatar 3");
                 movie3.setDescription("The next installment in the Avatar franchise.");
@@ -90,6 +90,30 @@ public class CinemaBookingBackendApplication {
                 movie3.setReleaseDate(java.time.LocalDate.of(2026, 12, 18));
                 movie3.setIsActive(true);
                 movie3 = movieRepository.save(movie3);
+
+                Movie movie4 = new Movie();
+                movie4.setTitle("Mission: Impossible 8");
+                movie4.setDescription("Ethan Hunt and his IMF team embark on their most dangerous mission yet.");
+                movie4.setRating(0.0);
+                movie4.setImageUrl("https://image.tmdb.org/t/p/w500/3BH0UfLd7Fvq58n0p7JQ5J8H5oG.jpg");
+                movie4.setDuration(163);
+                movie4.setGenre("Action, Thriller");
+                movie4.setYear(2025);
+                movie4.setReleaseDate(java.time.LocalDate.of(2025, 8, 15));
+                movie4.setIsActive(true);
+                movieRepository.save(movie4);
+
+                Movie movie5 = new Movie();
+                movie5.setTitle("Jurassic World Rebirth");
+                movie5.setDescription("A new era of dinosaurs begins.");
+                movie5.setRating(0.0);
+                movie5.setImageUrl("https://image.tmdb.org/t/p/w500/9n2tJBplPbgR2ca05hS5CKXwP2c.jpg");
+                movie5.setDuration(145);
+                movie5.setGenre("Action, Sci-Fi");
+                movie5.setYear(2025);
+                movie5.setReleaseDate(java.time.LocalDate.of(2025, 9, 5));
+                movie5.setIsActive(true);
+                movieRepository.save(movie5);
 
                 System.out.println("Initial movies created!");
             } else {

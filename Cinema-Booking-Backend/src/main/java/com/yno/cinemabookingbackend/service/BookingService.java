@@ -1,6 +1,7 @@
 package com.yno.cinemabookingbackend.service;
 
 import com.yno.cinemabookingbackend.dto.request.CreateBookingRequest;
+import com.yno.cinemabookingbackend.dto.response.*;
 import com.yno.cinemabookingbackend.entitiy.*;
 import com.yno.cinemabookingbackend.enumType.BookingStatus;
 import com.yno.cinemabookingbackend.repository.*;
@@ -8,9 +9,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-import java.awt.print.Book;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -21,15 +23,19 @@ public class BookingService {
     private final SeatRepository seatRepository;
     private final BookingSeatRepository bookingSeatRepository;
 
-    public List<Booking> getAllBookings() {
-        return bookingRepository.findAll();
+    public List<BookingResponse> getAllBookings() {
+        return bookingRepository.findAll().stream()
+                .map(this::convertToBookingResponse)
+                .collect(Collectors.toList());
     }
 
-    public List<Booking> getBookingsByUserId(Long userId) {
-        return bookingRepository.findByUserId(userId);
+    public List<BookingResponse> getBookingsByUserId(Long userId) {
+        return bookingRepository.findByUserId(userId).stream()
+                .map(this::convertToBookingResponse)
+                .collect(Collectors.toList());
     }
 
-    public Booking createBooking(CreateBookingRequest request, Authentication auth) {
+    public BookingResponse createBooking(CreateBookingRequest request, Authentication auth) {
 
         String username = auth.getName();
         User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
@@ -54,14 +60,83 @@ public class BookingService {
             bookingSeat.setSeat(seat);
             bookingSeatRepository.save(bookingSeat);
         });
-        return saveBooking;
+        return convertToBookingResponse(saveBooking);
     }
 
-    public Booking updateBookingStatus(Long bookingId, String status) {
+    public BookingResponse updateBookingStatus(Long bookingId, String status) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() ->
                         new RuntimeException("Booking not found"));
         booking.setBookingStatus(BookingStatus.valueOf(status.toUpperCase()));
-        return bookingRepository.save(booking);
+        return convertToBookingResponse(bookingRepository.save(booking));
+    }
+
+    private BookingSeatResponse convertToBookingSeatResponse(Seat seat) {
+        return new BookingSeatResponse(
+                seat.getId(),
+                seat.getSeatNumber(),
+                seat.getRowChar(),
+                seat.getCol(),
+                seat.getPrice()
+        );
+    }
+
+    private ShowTimeResponse convertToShowTimeResponse(ShowTime showTime) {
+        MovieResponse movieResponse = null;
+        if (showTime.getMovie() != null) {
+            movieResponse = new MovieResponse(
+                    showTime.getMovie().getId(),
+                    showTime.getMovie().getTitle(),
+                    showTime.getMovie().getDescription(),
+                    showTime.getMovie().getRating(),
+                    showTime.getMovie().getImageUrl(),
+                    showTime.getMovie().getDuration(),
+                    showTime.getMovie().getGenre(),
+                    showTime.getMovie().getYear(),
+                    showTime.getMovie().getReleaseDate(),
+                    showTime.getMovie().getIsActive(),
+                    null,
+                    null
+            );
+        }
+
+        TheaterResponse theaterResponse = null;
+        if (showTime.getTheater() != null) {
+            theaterResponse = new TheaterResponse(
+                    showTime.getTheater().getId(),
+                    showTime.getTheater().getName(),
+                    showTime.getTheater().getLocation(),
+                    showTime.getTheater().getTotalSeats()
+            );
+        }
+
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+        String formattedShowTime = showTime.getShowTime() != null ? showTime.getShowTime().format(timeFormatter) : null;
+
+        return new ShowTimeResponse(
+                showTime.getId(),
+                theaterResponse,
+                movieResponse,
+                showTime.getMovie() != null ? showTime.getMovie().getId() : null,
+                showTime.getMovie() != null ? showTime.getMovie().getTitle() : null,
+                showTime.getShowDate(),
+                formattedShowTime,
+                showTime.getAvailableSeats()
+        );
+    }
+
+    private BookingResponse convertToBookingResponse(Booking booking) {
+        List<BookingSeatResponse> seatResponses = booking.getBookingSeats().stream()
+                .map(bookingSeat -> convertToBookingSeatResponse(bookingSeat.getSeat()))
+                .collect(Collectors.toList());
+
+        return new BookingResponse(
+                booking.getId(),
+                booking.getBookingReference(),
+                booking.getTotalAmount(),
+                booking.getBookingStatus().name(),
+                convertToShowTimeResponse(booking.getShowTime()),
+                seatResponses
+        );
     }
 }

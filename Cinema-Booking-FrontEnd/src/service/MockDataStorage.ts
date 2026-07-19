@@ -85,9 +85,9 @@ const defaultBookings: Booking[] = [
   {
     id: 1,
     user: { username: "john_doe" },
-    showtime: defaultShowtimes[0],
+    showTime: defaultShowtimes[0],
     totalAmount: 25.0,
-    status: "CONFIRMED",
+    bookingStatus: "CONFIRMED",
     bookingReference: "BOOK-001"
   }
 ];

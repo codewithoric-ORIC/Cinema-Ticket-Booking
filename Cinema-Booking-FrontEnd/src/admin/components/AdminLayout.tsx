@@ -1,8 +1,6 @@
 import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
 import {
   IoHomeOutline,
-  IoCalendarOutline,
-  IoAddCircleOutline,
   IoTicketOutline,
   IoPersonOutline,
   IoLogOutOutline,

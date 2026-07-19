@@ -26,20 +26,29 @@ export interface Theater {
 export interface Showtime {
   id: number;
   theater: Theater;
-  movieId: number;
-  movieTitle: string;
+  movie?: Movie;
+  movieId?: number;
+  movieTitle?: string;
   showDate: string;
   showTime: string;
   availableSeats: number;
 }
 
+export interface BookingSeat {
+  id: number;
+  seatNumber: string;
+  rowChar: string;
+  col: number;
+  price: number;
+}
+
 export interface Booking {
   id: number;
-  user: any;
-  showtime: Showtime;
-  totalAmount: number;
-  status: string;
   bookingReference: string;
+  totalAmount: number;
+  bookingStatus: string;
+  showTime: Showtime;
+  seats: BookingSeat[];
 }
 
 // Get all movies
@@ -212,7 +221,7 @@ export const updateBookingStatus = async (id: number, status: string): Promise<B
     const bookings = getMockBookings();
     const booking = bookings.find(b => b.id === id);
     if (booking) {
-      booking.status = status;
+      booking.bookingStatus = status;
       saveMockBookings(bookings);
     }
     return booking || bookings[0];

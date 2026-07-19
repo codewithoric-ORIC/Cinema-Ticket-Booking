@@ -1,13 +1,13 @@
-import { useLocation, useNavigate, Link } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 import { useState } from "react";
-import { IoArrowBack, IoPerson, IoMail, IoCall, IoCard, IoCheckmarkCircle, IoTicket, IoTimeOutline, IoCalendarOutline } from "react-icons/io5";
+import { IoArrowBack, IoPerson, IoMail, IoCall, IoCard, IoCheckmarkCircle, IoTicket, IoTimeOutline, IoCalendarOutline, IoLocationOutline } from "react-icons/io5";
 import { isLoggedIn, getLogeedInUsername } from "../auth/service/AuthService";
-import { saveBooking } from "../service/BookingService";
+import { saveBooking, saveAPIBooking } from "../service/BookingService";
 
 function Checkout() {
-    const location = useLocation();
-    const navigate = useNavigate();
-    const { movie, date, day, time, seats, totalPrice } = location.state || {};
+  const location = useLocation();
+  const { movie, date, day, showtime, theater, seats, seatIds, totalPrice } = location.state || {};
+  const time = showtime?.showTime;
 
     // Test payment data
     const TEST_DATA = {
@@ -60,26 +60,41 @@ function Checkout() {
         }));
     };
 
-    const handlePayment = (e: React.FormEvent<HTMLFormElement>) => {
+    const handlePayment = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setIsProcessing(true);
+        console.log("handlePayment called!");
+        console.log("showtime?.id:", showtime?.id);
+        console.log("seatIds:", seatIds);
+        console.log("seatIds?.length:", seatIds?.length);
+        console.log("isLoggedIn():", isLoggedIn());
 
-        // Simulate payment processing
-        setTimeout(() => {
-            // Save booking to localStorage
-            if (movie && date && day && time && seats && totalPrice) {
+        try {
+            // First save to backend if we have showtime id and seat ids
+            if (showtime?.id && seatIds && seatIds.length > 0 && isLoggedIn()) {
+                console.log("Calling saveAPIBooking...");
+                await saveAPIBooking(showtime.id, seatIds, totalPrice);
+                console.log("saveAPIBooking completed!");
+            }
+            // Also save to localStorage for MyBookings page
+            if (movie && date && day && time && theater && seats && totalPrice) {
                 saveBooking({
                     movie: movie,
                     date: date,
                     day: day,
                     time: time,
+                    theater: theater,
                     seats: seats,
                     totalPrice: totalPrice
                 });
             }
-            setIsProcessing(false);
             setPaymentSuccess(true);
-        }, 2000);
+        } catch (error) {
+            console.error("Failed to save booking", error);
+            alert("Failed to complete booking. Please try again.");
+        } finally {
+            setIsProcessing(false);
+        }
     };
 
     if (!movie) {
@@ -119,6 +134,12 @@ function Checkout() {
                                     <span className="text-slate-500 font-semibold">Movie</span>
                                     <span className="text-slate-800 font-bold">{movie.title}</span>
                                 </div>
+                                {theater && (
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-slate-500 font-semibold">Theater</span>
+                                        <span className="text-slate-800 font-bold">{theater.name}, {theater.location}</span>
+                                    </div>
+                                )}
                                 <div className="flex justify-between text-sm">
                                     <span className="text-slate-500 font-semibold">Date</span>
                                     <span className="text-slate-800 font-bold">{day}, {date}</span>
@@ -245,6 +266,12 @@ function Checkout() {
                             <div className="bg-white/60 backdrop-blur-xl border border-white/80 rounded-[2rem] p-5 mb-6">
                                 <h4 className="text-lg font-black text-slate-800 mb-2">{movie.title}</h4>
                                 <div className="space-y-2 text-sm">
+                                    {theater && (
+                                        <div className="flex items-center gap-2 text-slate-500">
+                                            <IoLocationOutline className="w-4 h-4"></IoLocationOutline>
+                                            <span>{theater.name}, {theater.location}</span>
+                                        </div>
+                                    )}
                                     <div className="flex items-center gap-2 text-slate-500">
                                         <IoCalendarOutline className="w-4 h-4"></IoCalendarOutline>
                                         <span>{day}, {date}</span>

@@ -1,26 +1,40 @@
 import { useState, useEffect } from "react";
-import { IoStar } from "react-icons/io5";
+import { IoStar, IoHeartOutline, IoHeart } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
-import { fetchAllMovies, type Movie } from "../../service/MovieService";
+import { fetchAllMovies, type Movie, checkIsFavourite, addToFavourites, removeFromFavourites } from "../../service/MovieService";
+import { isLoggedIn } from "../../auth/service/AuthService";
 
 function Movies() {
   const navigate = useNavigate();
   const [visibleCount, setVisibleCount] = useState<number>(4);
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
+  const [favourites, setFavourites] = useState<number[]>([]);
 
   useEffect(() => {
-    const loadMovies = async () => {
+    const loadMoviesAndFavourites = async () => {
       try {
         const data = await fetchAllMovies();
         setMovies(data);
+        // Load favourite status for each movie
+        const favouriteStatuses = await Promise.all(
+          data.map(async (movie) => {
+            try {
+              const isFav = await checkIsFavourite(movie.id);
+              return isFav ? movie.id : null;
+            } catch (e) {
+                return null;
+            }
+          })
+        );
+        setFavourites(favouriteStatuses.filter((id) => id !== null) as number[]);
       } catch (e) {
         console.error("Failed to load movies:", e);
       } finally {
         setLoading(false);
       }
     };
-    loadMovies();
+    loadMoviesAndFavourites();
   }, []);
 
   const handleShowMore = () => {
@@ -116,9 +130,39 @@ function Movies() {
                           <span className="relative z-10">Get Ticket</span>
                         </button>
 
-                        <div className="flex items-center gap-0.5 px-2 h-9 rounded-lg bg-amber-500/[0.06] border border-amber-500/15 shadow-[inset_0_1px_1px_rgba(255,255,255,0.3)] shrink-0">
-                          <IoStar className="w-3 h-3 text-amber-500"/>
-                          <span className="text-[11px] font-bold text-amber-700">{movie.rating}</span>
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-0.5 px-2 h-9 rounded-lg bg-amber-500/[0.06] border border-amber-500/15 shadow-[inset_0_1px_1px_rgba(255,255,255,0.3)] shrink-0">
+                            <IoStar className="w-3 h-3 text-amber-500"/>
+                            <span className="text-[11px] font-bold text-amber-700">{movie.rating}</span>
+                          </div>
+                          <button
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              if (!isLoggedIn()) {
+                                alert("Please log in to add favourites!");
+                                return;
+                              }
+                              const isCurrentlyFavourite = favourites.includes(movie.id);
+                              try {
+                                if (isCurrentlyFavourite) {
+                                  await removeFromFavourites(movie.id);
+                                  setFavourites(favourites.filter(id => id !== movie.id));
+                                } else {
+                                  await addToFavourites(movie.id);
+                                  setFavourites([...favourites, movie.id]);
+                                }
+                              } catch (err) {
+                                console.error("Failed to toggle favourite:", err);
+                              }
+                            }}
+                            className="p-2 rounded-lg bg-purple-500/[0.06] border border-purple-500/15 hover:bg-purple-600 hover:text-white transition-all"
+                          >
+                            {favourites.includes(movie.id) ? (
+                              <IoHeart className="w-4 h-4" />
+                            ) : (
+                              <IoHeartOutline className="w-4 h-4" />
+                            )}
+                          </button>
                         </div>
                       </div>
                     </div>
